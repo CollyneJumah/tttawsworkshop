@@ -1,3 +1,11 @@
+<!-- 
+This userdata script installs GIT and apache web server.
+- Clones a repository and moves to the root directory
+- The website is accessible by the public IP address of the instance.
+ -->
+
+
+
 #!/bin/bash
 # Update and upgrade packages
 yum update -y

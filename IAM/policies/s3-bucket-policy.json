@@ -1,0 +1,20 @@
+// Allow public access to your bucket
+
+{
+    "Version": "2012-10-17",
+    "Id": "Policy1621958846486",
+    "Statement": [
+        {
+            "Sid": "OriginalPublicReadPolicy",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": [
+                "s3:GetObject",
+                "s3:GetObjectVersion"
+            ],
+            "Resource": "RESOURCE_ARN/*"
+        }
+    ]
+}
+
+// append the "/*" which means the policy definition applies to all objects in the bucket
