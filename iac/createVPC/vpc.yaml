@@ -1,0 +1,90 @@
+# Create a VPC using Cloudformation template
+
+Description: CloudFormation template to create a VPC.
+Resources:
+      MainVPC:
+        Type: AWS::EC2::VPC
+        Properties:
+            CidrBlock: 10.0.0.0/16
+            EnableDnsSupport: true
+            EnableDnsHostnames: true
+            Tags:
+                - Key: Name
+                  Value: CollinsVPC
+# add internet gateway
+      InternetGateway:
+        Type: AWS::EC2::InternetGateway
+        Properties:
+            Tags:
+                - Key: Name
+                  Value: CollinsGateway
+      AttachGateway:
+        Type: AWS::EC2::VPCGatewayAttachment
+        Properties:
+            VpcId: !Ref MainVPC
+            InternetGatewayId: !Ref InternetGateway
+# add public subnet
+      PublicSubnet:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId: !Ref MainVPC
+            CidrBlock: 10.0.1.0/24
+            AvailabilityZone: 'us-east-1a'
+            MapPublicIpOnLaunch: true
+            Tags:
+                - Key: Name
+                  Value: CollinsPublicSubnet
+# another subnet in another AZ
+      PrivateSubnet:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId: !Ref MainVPC
+            CidrBlock: 10.0.2.0/24
+            AvailabilityZone: 'us-east-1b'
+            MapPublicIpOnLaunch: false
+            Tags:
+                - Key: Name
+                  Value: CollinsPrivateSubnet
+# add route table and associate the two subnets
+      PublicRouteTable:
+        Type: AWS::EC2::RouteTable
+        Properties:
+            VpcId: !Ref MainVPC
+            Tags:
+                - Key: Name
+                  Value: CollinsPublicRouteTable
+      PublicRoute:
+        Type: AWS::EC2::Route
+        Properties:
+            RouteTableId: !Ref PublicRouteTable
+            DestinationCidrBlock: 0.0.0.0/0
+            GatewayId: !Ref InternetGateway
+      PublicSubnetRouteTableAssociation:
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties:
+            SubnetId: !Ref PublicSubnet
+            RouteTableId: !Ref PublicRouteTable
+# add security group to allow ssh and http traffic
+      SecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupName: CollinsSecurityGroup
+            GroupDescription: Security group for web and ssh traffic
+            VpcId: !Ref MainVPC
+            SecurityGroupIngress:
+                - IpProtocol: tcp
+                  FromPort: 22
+                  ToPort: 22
+                  CidrIp: 0.0.0.0/0
+                - IpProtocol: tcp
+                  FromPort: 80
+                  ToPort: 80
+                  CidrIp: 0.0.0.0/0
+            SecurityGroupEgress:
+                - IpProtocol: tcp
+                  FromPort: 0
+                  ToPort: 65535
+                  CidrIp: 0.0.0.0/0
+            Tags:
+                 - Value: CollinsSecurityGroup
+                   Key: Name
