@@ -1,0 +1,30 @@
+
+AWSTemplateFormatVersion: "2010-09-09"
+Description: > 
+    This Cloudformation Template creates an EC2 instance in a VPC.
+    The EC2 instance is configured with a public IP address, an EBS volume,
+
+Resources:
+     # Create EC2 Linux
+     EC2Instance:
+        Type: AWS::EC2::Instance
+        Properties:
+            ImageId: XXXXXXXXXXXXXXXXXXXXX
+            InstanceType: t2.micro
+            KeyName: collinsInstance
+            BlockDeviceMappings:
+                - DeviceName: "/dev/sdk"
+                  Ebs:
+                      VolumeSize: '10'
+            Tags:
+                 - Key: Name
+                   Value: collinsInstance
+            UserData: 
+                Fn::Base64: |
+                    #!/bin/bash
+                    sudo yum update -y
+                    sudo yum install -y httpd
+                    sudo systemctl start httpd
+                    sudo systemctl enable httpd
+                    sudo chmod 777 /var/www/html
+                    sudo echo "Hello World from collins" > /var/www/html/index.html

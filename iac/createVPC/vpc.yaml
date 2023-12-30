@@ -88,3 +88,29 @@ Resources:
             Tags:
                  - Value: CollinsSecurityGroup
                    Key: Name
+# add EC2 instance to the public subnet 
+      EC2Instance:
+        Type: AWS::EC2::Instance
+        Properties:
+            ImageId: "ami-0331ebbf81138e4de"
+            InstanceType: t2.micro
+            KeyName: collins-key
+            SubnetId: !Ref PublicSubnet
+            SecurityGroupIds:
+                - !Ref SecurityGroup
+            BlockDeviceMappings:
+                 - DeviceName: "/dev/sdk"
+                   Ebs:
+                       VolumeSize: '10'
+            Tags:
+                - Key: Name
+                  Value: CollinsEC2Instance
+            UserData: 
+                Fn::Base64: |
+                    #!/bin/bash
+                    yum update -y
+                    yum install -y httpd
+                    systemctl start httpd
+                    systemctl enable httpd
+                    echo "Hello from Collins" > /var/www/html/index.html
+                    
